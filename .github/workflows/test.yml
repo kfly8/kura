@@ -49,6 +49,14 @@ jobs:
           cpm install -g Moo
           cpm install -g Specio
 
-      - name: Run test
-        run: prove -lr t
+      - run: perl Build.PL
+      - run: ./Build
+      - run: ./Build test
 
+      - name: Run coverage
+        if: ${{ matrix.coverage }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cpm install -g Devel::Cover::Report::Coveralls
+          cover -test -report coveralls -ignore_re '^/opt'
