@@ -26,6 +26,11 @@ subtest 'Test `kura` exceptions' => sub {
         like $@, qr/^'BEGIN' is forbidden/;
     };
 
+    subtest 'Not given checker' => sub {
+        eval "use kura Foo";
+        like $@, qr/^checker is required/;
+    };
+
     subtest 'Invalid checker' => sub {
         eval "use kura Bar => 1";
         like $@, qr/^Not a valid checker/;
