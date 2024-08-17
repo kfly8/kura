@@ -6,9 +6,9 @@ our $VERSION = "0.01";
 
 use Carp qw(croak);
 use Sub::Util qw(set_subname);
-use Scalar::Util qw(blessed);
+use Scalar::Util qw(blessed reftype);
 
-my %forbidden_kote_name = map { $_ => 1 } qw{
+my %forbidden_kura_name = map { $_ => 1 } qw{
     BEGIN CHECK DESTROY END INIT UNITCHECK
     AUTOLOAD STDIN STDOUT STDERR ARGV ARGVOUT ENV INC SIG
 };
@@ -39,7 +39,7 @@ sub _validate_name {
     if (!$name) {
         return 'name is required';
     }
-    elsif ($forbidden_kote_name{$name}) {
+    elsif ($forbidden_kura_name{$name}) {
         return "'$name' is forbidden.";
     }
 
@@ -49,14 +49,30 @@ sub _validate_name {
 sub _validate_checker {
     my ($class, $checker) = @_;
 
-    if (!$checker) {
+    unless (defined $checker) {
         return 'checker is required';
     }
-    elsif (blessed $checker && $checker->can('check')) {
-        return;
-    }
+
+    return if blessed($checker) && $checker->can('check');
+
+    my $ref = reftype($checker) // '';
+
+    return if $ref eq 'CODE';
 
     return 'Not a valid checker';
+}
+
+sub _checker_to_code {
+    my ($class, $checker) = @_;
+
+    if (reftype($checker) eq 'CODE') {
+        require Type::Tiny;
+        $checker = Type::Tiny->new(
+            constraint => $checker,
+        );
+    }
+
+    sub { $checker };
 }
 
 sub _install_checker {
@@ -66,7 +82,7 @@ sub _install_checker {
         return "'$name' is already defined";
     }
 
-    my $code = sub () { $checker };
+    my $code = $class->_checker_to_code($checker);
 
     {
         no strict "refs";

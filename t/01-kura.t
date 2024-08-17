@@ -11,7 +11,6 @@ subtest 'Test `kura` features' => sub {
 };
 
 subtest 'Test `kura` exceptions' => sub {
-
     subtest 'Checker already defined' => sub {
         eval "use kura Foo => MyChecker->new";
         like $@, qr/^'Foo' is already defined/;
@@ -28,9 +27,6 @@ subtest 'Test `kura` exceptions' => sub {
     };
 
     subtest 'Invalid checker' => sub {
-        eval "use kura Bar => sub { 1 }";
-        like $@, qr/^Not a valid checker/;
-
         eval "use kura Bar => 1";
         like $@, qr/^Not a valid checker/;
     };
