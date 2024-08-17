@@ -1,5 +1,5 @@
 {
-   "abstract" : "It's new $module",
+   "abstract" : "Store value constraints for Type::Tiny, Moose, Data::Checks, etc.",
    "author" : [
       "kobaken <kentafly88@gmail.com>"
    ],
@@ -42,17 +42,30 @@
       },
       "runtime" : {
          "requires" : {
-            "perl" : "5.008001"
+            "Sub::Util" : "1.40",
+            "perl" : "5.016000"
          }
       },
       "test" : {
          "requires" : {
-            "Test::More" : "0.98"
+            "Test2::V0" : "0.000147"
          }
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/kfly8/kura/issues"
+      },
+      "homepage" : "https://github.com/kfly8/kura",
+      "repository" : {
+         "type" : "git",
+         "url" : "https://github.com/kfly8/kura.git",
+         "web" : "https://github.com/kfly8/kura"
+      }
+   },
    "version" : "0.01",
+   "x_authority" : "cpan:KFLY",
    "x_serialization_backend" : "JSON::PP version 4.16",
    "x_static_install" : 1
 }
