@@ -25,10 +25,10 @@ package MyQux {
     use kura Qux => sub { $_[0] eq 'qux' };
 }
 
-use MyFoo qw(Foo); isa_ok Foo, 'Data::Checks::Constraint';
-use MyBar qw(Bar); isa_ok Bar, 'Type::Tiny';
-use MyBaz qw(Baz); isa_ok Baz, 'Moose::Meta::TypeConstraint';
-use MyQux qw(Qux); isa_ok Qux, 'Type::Tiny'; # CodeRef converted to Type::Tiny
+use MyFoo qw(Foo);
+use MyBar qw(Bar);
+use MyBaz qw(Baz);
+use MyQux qw(Qux); # CodeRef converted to Type::Tiny
 
 ok  Foo->check('foo') && !Foo->check('bar') && !Foo->check('baz') && !Foo->check('qux');
 ok !Bar->check('foo') &&  Bar->check('bar') && !Bar->check('baz') && !Bar->check('qux');
