@@ -1,6 +1,6 @@
 use Test2::V0;
 
-use lib 't/lib';
+use lib './t/lib';
 use MyChecker;
 
 subtest 'Test `kura` features' => sub {

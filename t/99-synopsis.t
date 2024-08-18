@@ -1,5 +1,7 @@
 use Test2::V0;
 use Test2::Require::Module 'Type::Tiny', '2.000000';
+use Test2::Require::Module 'Data::Checks', '0.09';
+use Test2::Require::Module 'Moose', '2.2207';
 
 package MyFoo {
     use Data::Checks qw(StrEq);

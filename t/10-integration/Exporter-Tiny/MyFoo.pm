@@ -1,5 +1,5 @@
 package MyFoo;
 
-use mystore Foo => sub { $_ eq 'foo' };
+use mykura Foo => sub { $_ eq 'foo' };
 
 1;

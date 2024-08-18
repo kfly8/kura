@@ -6,7 +6,7 @@ use FindBin qw($Bin);;
 use lib "$Bin/Exporter-Tiny";
 
 subtest 'Test `kura` with Exporter::Tiny' => sub {
-    use mystore Foo => sub { $_ eq 'foo' };
+    use mykura Foo => sub { $_ eq 'foo' };
 
     isa_ok __PACKAGE__, 'Exporter::Tiny';
 

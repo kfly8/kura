@@ -1,4 +1,4 @@
-package MyKura;
+package mykura;
 use strict;
 use warnings;
 

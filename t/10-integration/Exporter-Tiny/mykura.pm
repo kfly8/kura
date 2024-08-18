@@ -1,4 +1,4 @@
-package mystore;
+package mykura;
 use strict;
 use warnings;
 
