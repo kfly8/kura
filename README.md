@@ -63,6 +63,20 @@ use kura NAME => CONSTRAINT;
 ```
 
 This constraint must be a any object that has a `check` method or a code reference that returns true or false.
+The following is an example of a constraint declaration:
+
+```perl
+# use Type::Tiny
+use Types::Standard -types;
+
+use kura Name  => Str & sub { qr/^[A-Z][a-z]+$/ };
+use kura Level => Int & sub { $_[0] >= 1 && $_[0] <= 100 };
+
+use kura Charactor => Dict[
+    name  => Name,
+    level => Level,
+];
+```
 
 When declaring constraints, it is important to define child constraints before their parent constraints to avoid errors. For example:
 
