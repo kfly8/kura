@@ -50,7 +50,7 @@ Moose::Meta::TypeConstraint --> |        |
 YourFavoriteConstraint -------> +--------+
 ```
 
-If your project uses multiple constraint libraries, kura allows you to simplify your codebase and making it easier to manage different constraint systems. This is especially useful in large projects or when migrating from one constraint system to another.
+If your project uses multiple constraint libraries, kura allows you to simplify your codes and making it easier to manage different constraint systems. This is especially useful in large projects or when migrating from one constraint system to another.
 
 # HOW TO USE
 
