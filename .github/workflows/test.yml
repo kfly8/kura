@@ -48,6 +48,7 @@ jobs:
           cpm install -g Mouse
           cpm install -g Moo
           cpm install -g Specio
+          cpm install -g MooseX::Types
           cpm install -g Exporter::Tiny
 
       - run: perl Build.PL
