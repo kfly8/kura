@@ -233,26 +233,26 @@ So, you can add other functions to C<@EXPORT_OK>:
 
 =head2 $EXPORTER_CLASS
 
-C<$EXPORTER_CLASS> is a package name of the Exporter class, default is C<Exporter>.
+C<$EXPORTER_CLASS> is a package name of the Exporter class, default is L<Exporter>.
 You can change this class by setting C<$kura::EXPORTER_CLASS>.
 
-    package MyKura {
+    package mykura {
         use kura ();
 
         sub import {
             my $pkg = shift;
             my $caller = caller;
 
-            local $kura::EXPORTER_CLASS = 'MyExporter';
+            local $kura::EXPORTER_CLASS = 'Exporter::Tiny';
             kura->import_into($caller, @_);
         }
     }
 
     package MyFoo {
-        use MyKura Foo => sub { $_[0] eq 'foo' };
+        use mykura Foo => sub { $_[0] eq 'foo' };
     }
 
-    MyFoo->isa('MyExporter'); # true
+    MyFoo->isa('Exporter::Tiny'); # true
 
 =head1 LICENSE
 

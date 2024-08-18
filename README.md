@@ -115,27 +115,27 @@ hello(); # 'Hello, World!'
 
 ## $EXPORTER\_CLASS
 
-`$EXPORTER_CLASS` is a package name of the Exporter class, default is `Exporter`.
+`$EXPORTER_CLASS` is a package name of the Exporter class, default is [Exporter](https://metacpan.org/pod/Exporter).
 You can change this class by setting `$kura::EXPORTER_CLASS`.
 
 ```perl
-package MyKura {
+package mykura {
     use kura ();
 
     sub import {
         my $pkg = shift;
         my $caller = caller;
 
-        local $kura::EXPORTER_CLASS = 'MyExporter';
+        local $kura::EXPORTER_CLASS = 'Exporter::Tiny';
         kura->import_into($caller, @_);
     }
 }
 
 package MyFoo {
-    use MyKura Foo => sub { $_[0] eq 'foo' };
+    use mykura Foo => sub { $_[0] eq 'foo' };
 }
 
-MyFoo->isa('MyExporter'); # true
+MyFoo->isa('Exporter::Tiny'); # true
 ```
 
 # LICENSE
