@@ -133,7 +133,7 @@ __END__
 
 =head1 NAME
 
-kura - Store constraints for Data::Checks, Type::Tiny, Moose and so on.
+kura - Store constraints for Data::Checks, Type::Tiny, Moose and more.
 
 =head1 SYNOPSIS
 
@@ -168,15 +168,17 @@ kura - Store constraints for Data::Checks, Type::Tiny, Moose and so on.
 
 =head1 DESCRIPTION
 
-Kura - means "Traditional Japanese storehouse" - stores constraints, such as L<Data::Checks>, L<Type::Tiny>, L<Moose::Meta::TypeConstraint>, L<Mouse::Meta::TypeConstraint>, L<Specio> and so on. Of course, you can use L<Moo> with kura by using L<Type::Tiny> constraints.
+Kura - means "Traditional Japanese storehouse" - stores constraints, such as L<Data::Checks>, L<Type::Tiny>, L<Moose::Meta::TypeConstraint>, L<Mouse::Meta::TypeConstraint>, L<Specio> and more. It can even be used with L<Moo> when combined with L<Type::Tiny> constraints.
 
-    Data::Checks -----------------> ********
-                                    *      *
-    Type::Tiny -------------------> *      *
-                                    * Kura * --> Call Named Value Constraints!
-    Moose::Meta::TypeConstraint --> *      *
-                                    *      *
-    YourFavoriteChecker ----------> ********
+    Data::Checks -----------------> +--------+
+                                    |        |
+    Type::Tiny -------------------> |        |
+                                    |  Kura  | ---> Named Value Constraints!
+    Moose::Meta::TypeConstraint --> |        |
+                                    |        |
+    YourFavoriteChecker ----------> +--------+
+
+If your project uses multiple constraint libraries, kura allows you to simplify your codebase and making it easier to manage different constraint systems. This is especially useful in large projects or when migrating from one constraint system to another.
 
 =head1 HOW TO USE
 
@@ -186,9 +188,9 @@ It's easy to use to store constraints in a package:
 
     use kura NAME => CONSTRAINT;
 
-This constraint must be a any object that has a C<check> method, or a code reference that returns true or false.
+This constraint must be a any object that has a C<check> method or a code reference that returns true or false.
 
-Order of declarations is important, child constraints must be declared before parent constraints.
+When declaring constraints, it is important to define child constraints before their parent constraints to avoid errors. For example:
 
     # Bad order
     use kura Parent => Dict[ name => Child ]; # => Bareword "Child" not allowed
@@ -197,6 +199,8 @@ Order of declarations is important, child constraints must be declared before pa
     # Good order
     use kura Child => Str;
     use kura Parent => Dict[ name => Child ];
+
+If constraints are declared in the wrong order, you might encounter errors like “Bareword not allowed.” Ensure that all dependencies are declared beforehand to prevent such issues.
 
 =head2 Using a constraint
 
@@ -231,7 +235,7 @@ So, you can add other functions to C<@EXPORT_OK>:
 
 =head1 Customizing
 
-=head2 $EXPORTER_CLASS
+=head2 C<$EXPORTER_CLASS>
 
 C<$EXPORTER_CLASS> is a package name of the Exporter class, default is L<Exporter>.
 You can change this class by setting C<$kura::EXPORTER_CLASS>.

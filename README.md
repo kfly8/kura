@@ -1,7 +1,7 @@
 [![Actions Status](https://github.com/kfly8/kura/actions/workflows/test.yml/badge.svg)](https://github.com/kfly8/kura/actions) [![Coverage Status](https://img.shields.io/coveralls/kfly8/kura/main.svg?style=flat)](https://coveralls.io/r/kfly8/kura?branch=main) [![MetaCPAN Release](https://badge.fury.io/pl/kura.svg)](https://metacpan.org/release/kura)
 # NAME
 
-kura - Store constraints for Data::Checks, Type::Tiny, Moose and so on.
+kura - Store constraints for Data::Checks, Type::Tiny, Moose and more.
 
 # SYNOPSIS
 
@@ -38,17 +38,19 @@ ok !Qux->check('foo') && !Qux->check('bar') && !Qux->check('baz') &&  Qux->check
 
 # DESCRIPTION
 
-Kura - means "Traditional Japanese storehouse" - stores constraints, such as [Data::Checks](https://metacpan.org/pod/Data%3A%3AChecks), [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny), [Moose::Meta::TypeConstraint](https://metacpan.org/pod/Moose%3A%3AMeta%3A%3ATypeConstraint), [Mouse::Meta::TypeConstraint](https://metacpan.org/pod/Mouse%3A%3AMeta%3A%3ATypeConstraint), [Specio](https://metacpan.org/pod/Specio) and so on. Of course, you can use [Moo](https://metacpan.org/pod/Moo) with kura by using [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny) constraints.
+Kura - means "Traditional Japanese storehouse" - stores constraints, such as [Data::Checks](https://metacpan.org/pod/Data%3A%3AChecks), [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny), [Moose::Meta::TypeConstraint](https://metacpan.org/pod/Moose%3A%3AMeta%3A%3ATypeConstraint), [Mouse::Meta::TypeConstraint](https://metacpan.org/pod/Mouse%3A%3AMeta%3A%3ATypeConstraint), [Specio](https://metacpan.org/pod/Specio) and more. It can even be used with [Moo](https://metacpan.org/pod/Moo) when combined with [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny) constraints.
 
 ```
-Data::Checks -----------------> ********
-                                *      *
-Type::Tiny -------------------> *      *
-                                * Kura * --> Call Named Value Constraints!
-Moose::Meta::TypeConstraint --> *      *
-                                *      *
-YourFavoriteChecker ----------> ********
+Data::Checks -----------------> +--------+
+                                |        |
+Type::Tiny -------------------> |        |
+                                |  Kura  | ---> Named Value Constraints!
+Moose::Meta::TypeConstraint --> |        |
+                                |        |
+YourFavoriteChecker ----------> +--------+
 ```
+
+If your project uses multiple constraint libraries, kura allows you to simplify your codebase and making it easier to manage different constraint systems. This is especially useful in large projects or when migrating from one constraint system to another.
 
 # HOW TO USE
 
@@ -60,9 +62,9 @@ It's easy to use to store constraints in a package:
 use kura NAME => CONSTRAINT;
 ```
 
-This constraint must be a any object that has a `check` method, or a code reference that returns true or false.
+This constraint must be a any object that has a `check` method or a code reference that returns true or false.
 
-Order of declarations is important, child constraints must be declared before parent constraints.
+When declaring constraints, it is important to define child constraints before their parent constraints to avoid errors. For example:
 
 ```perl
 # Bad order
@@ -73,6 +75,8 @@ use kura Child => Str;
 use kura Child => Str;
 use kura Parent => Dict[ name => Child ];
 ```
+
+If constraints are declared in the wrong order, you might encounter errors like “Bareword not allowed.” Ensure that all dependencies are declared beforehand to prevent such issues.
 
 ## Using a constraint
 
@@ -113,7 +117,7 @@ hello(); # 'Hello, World!'
 
 # Customizing
 
-## $EXPORTER\_CLASS
+## `$EXPORTER_CLASS`
 
 `$EXPORTER_CLASS` is a package name of the Exporter class, default is [Exporter](https://metacpan.org/pod/Exporter).
 You can change this class by setting `$kura::EXPORTER_CLASS`.
