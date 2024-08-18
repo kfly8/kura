@@ -1,7 +1,7 @@
 [![Actions Status](https://github.com/kfly8/kura/actions/workflows/test.yml/badge.svg)](https://github.com/kfly8/kura/actions) [![Coverage Status](https://img.shields.io/coveralls/kfly8/kura/main.svg?style=flat)](https://coveralls.io/r/kfly8/kura?branch=main) [![MetaCPAN Release](https://badge.fury.io/pl/kura.svg)](https://metacpan.org/release/kura)
 # NAME
 
-kura - Store value constraints for Data::Checks, Type::Tiny, Moose and so on.
+kura - Store constraints for Data::Checks, Type::Tiny, Moose and so on.
 
 # SYNOPSIS
 
@@ -38,7 +38,7 @@ ok !Qux->check('foo') && !Qux->check('bar') && !Qux->check('baz') &&  Qux->check
 
 # DESCRIPTION
 
-Kura - means "Traditional Japanese storehouse" - stores value constraints, such as [Data::Checks](https://metacpan.org/pod/Data%3A%3AChecks), [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny), [Moose::Meta::TypeConstraint](https://metacpan.org/pod/Moose%3A%3AMeta%3A%3ATypeConstraint) and so on.
+Kura - means "Traditional Japanese storehouse" - stores constraints, such as [Data::Checks](https://metacpan.org/pod/Data%3A%3AChecks), [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny), [Moose::Meta::TypeConstraint](https://metacpan.org/pod/Moose%3A%3AMeta%3A%3ATypeConstraint) and so on.
 
 ```
 Data::Checks -----------------> ********
@@ -54,7 +54,7 @@ YourFavoriteChecker ----------> ********
 
 ## Declaring a constraint
 
-It's easy to use to store value constraints in a package:
+It's easy to use to store constraints in a package:
 
 ```perl
 use kura NAME => CONSTRAINT;
@@ -111,10 +111,31 @@ use MyFoo qw(Foo hello);
 hello(); # 'Hello, World!'
 ```
 
-If you would like to use other exporter class, then set `$kura::EXPORTER_CLASS`:
+# Customizing
 
-```
-$kura::EXPORTER_CLASS = 'MyExporter';
+## $EXPORTER\_CLASS
+
+`$EXPORTER_CLASS` is a package name of the Exporter class, default is `Exporter`.
+You can change this class by setting `$kura::EXPORTER_CLASS`.
+
+```perl
+package MyKura {
+    use kura ();
+
+    sub import {
+        my $pkg = shift;
+        my $caller = caller;
+
+        local $kura::EXPORTER_CLASS = 'MyExporter';
+        kura->import_into($caller, @_);
+    }
+}
+
+package MyFoo {
+    use MyKura Foo => sub { $_[0] eq 'foo' };
+}
+
+MyFoo->isa('MyExporter'); # true
 ```
 
 # LICENSE

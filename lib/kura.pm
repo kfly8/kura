@@ -133,7 +133,7 @@ __END__
 
 =head1 NAME
 
-kura - Store value constraints for Data::Checks, Type::Tiny, Moose and so on.
+kura - Store constraints for Data::Checks, Type::Tiny, Moose and so on.
 
 =head1 SYNOPSIS
 
@@ -168,7 +168,7 @@ kura - Store value constraints for Data::Checks, Type::Tiny, Moose and so on.
 
 =head1 DESCRIPTION
 
-Kura - means "Traditional Japanese storehouse" - stores value constraints, such as L<Data::Checks>, L<Type::Tiny>, L<Moose::Meta::TypeConstraint> and so on.
+Kura - means "Traditional Japanese storehouse" - stores constraints, such as L<Data::Checks>, L<Type::Tiny>, L<Moose::Meta::TypeConstraint> and so on.
 
     Data::Checks -----------------> ********
                                     *      *
@@ -182,7 +182,7 @@ Kura - means "Traditional Japanese storehouse" - stores value constraints, such 
 
 =head2 Declaring a constraint
 
-It's easy to use to store value constraints in a package:
+It's easy to use to store constraints in a package:
 
     use kura NAME => CONSTRAINT;
 
@@ -229,9 +229,30 @@ So, you can add other functions to C<@EXPORT_OK>:
    use MyFoo qw(Foo hello);
    hello(); # 'Hello, World!'
 
-If you would like to use other exporter class, then set C<$kura::EXPORTER_CLASS>:
+=head1 Customizing
 
-    $kura::EXPORTER_CLASS = 'MyExporter';
+=head2 $EXPORTER_CLASS
+
+C<$EXPORTER_CLASS> is a package name of the Exporter class, default is C<Exporter>.
+You can change this class by setting C<$kura::EXPORTER_CLASS>.
+
+    package MyKura {
+        use kura ();
+
+        sub import {
+            my $pkg = shift;
+            my $caller = caller;
+
+            local $kura::EXPORTER_CLASS = 'MyExporter';
+            kura->import_into($caller, @_);
+        }
+    }
+
+    package MyFoo {
+        use MyKura Foo => sub { $_[0] eq 'foo' };
+    }
+
+    MyFoo->isa('MyExporter'); # true
 
 =head1 LICENSE
 

@@ -5,8 +5,14 @@ use MyChecker;
 
 subtest 'Test `kura` features' => sub {
     subtest '`kura` import checker into caller' => sub {
-        use kura Foo => MyChecker->new;
+        use kura X => MyChecker->new;
+        isa_ok X, 'MyChecker';
+    };
+
+    subtest '`kura` with constarint and other function.' => sub {
+        use MyFoo qw(Foo hello);
         isa_ok Foo, 'MyChecker';
+        is hello(), 'Hello, Foo!';
     };
 };
 
@@ -36,6 +42,5 @@ subtest 'Test `kura` exceptions' => sub {
         like $@, qr/^Not a valid checker/;
     };
 };
-
 
 done_testing;
