@@ -1,5 +1,5 @@
 {
-   "abstract" : "Store value constraints for Type::Tiny, Moose, Data::Checks, etc.",
+   "abstract" : "Store value constraints for Data::Checks, Type::Tiny, Moose and so on.",
    "author" : [
       "kobaken <kentafly88@gmail.com>"
    ],

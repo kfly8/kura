@@ -1,46 +1,60 @@
 [![Actions Status](https://github.com/kfly8/kura/actions/workflows/test.yml/badge.svg)](https://github.com/kfly8/kura/actions) [![Coverage Status](https://img.shields.io/coveralls/kfly8/kura/main.svg?style=flat)](https://coveralls.io/r/kfly8/kura?branch=main) [![MetaCPAN Release](https://badge.fury.io/pl/kura.svg)](https://metacpan.org/release/kura)
 # NAME
 
-kura - Store value constraints for Type::Tiny, Moose, Data::Checks, etc.
+kura - Store value constraints for Data::Checks, Type::Tiny, Moose and so on.
 
 # SYNOPSIS
 
 ```perl
-package MyX {
+package MyFoo {
+    use Data::Checks qw(StrEq);
+    use kura Foo => StrEq('foo');
+}
+
+package MyBar {
     use Types::Standard -types;
-    use kura X => Str & sub { $_[0] eq 'x' };
+    use kura Bar => Str & sub { $_[0] eq 'bar' };
 }
 
-package MyY {
+package MyBaz {
     use Moose::Util::TypeConstraints;
-    use kura Y => subtype as 'Str' => where { $_[0] eq 'y' };
+    use kura Baz => subtype as 'Str' => where { $_[0] eq 'baz' };
 }
 
-package MyZ {
-    use kura Z => sub { $_[0] eq 'z' };
+package MyQux {
+    use kura Qux => sub { $_[0] eq 'qux' };
 }
 
-package MyW {
-    use Data::Checks qw(StrMatch);
-    use kura W => StrMatch(qr/w/);
-}
+use MyFoo qw(Foo); isa_ok Foo, 'Data::Checks::Constraint';
+use MyBar qw(Bar); isa_ok Bar, 'Type::Tiny';
+use MyBaz qw(Baz); isa_ok Baz, 'Moose::Meta::TypeConstraint';
+use MyQux qw(Qux); isa_ok Qux, 'Type::Tiny'; # CodeRef converted to Type::Tiny
 
-use MyX qw(X);
-use MyY qw(Y);
-use MyZ qw(Z);
-use MyW qw(W);
-
-ok  X->check('x') && !X->check('y') && !X->check('z') && !X->check('w');
-ok !Y->check('x') &&  Y->check('y') && !Y->check('z') && !Y->check('w');
-ok !Z->check('x') && !Z->check('y') &&  Z->check('z') && !Z->check('w');
-ok !W->check('x') && !W->check('y') && !W->check('z') &&  W->check('w');
+ok  Foo->check('foo') && !Foo->check('bar') && !Foo->check('baz') && !Foo->check('qux');
+ok !Bar->check('foo') &&  Bar->check('bar') && !Bar->check('baz') && !Bar->check('qux');
+ok !Baz->check('foo') && !Baz->check('bar') &&  Baz->check('baz') && !Baz->check('qux');
+ok !Qux->check('foo') && !Qux->check('bar') && !Qux->check('baz') &&  Qux->check('qux');
 ```
 
 # DESCRIPTION
 
-Kura - means "Traditional Japanese storehouse" - stores value constraints, such as [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny), [Moose::Meta::TypeConstraint](https://metacpan.org/pod/Moose%3A%3AMeta%3A%3ATypeConstraint) and [Data::Checks](https://metacpan.org/pod/Data%3A%3AChecks).
+Kura - means "Traditional Japanese storehouse" - stores value constraints, such as [Data::Checks](https://metacpan.org/pod/Data%3A%3AChecks), [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny), [Moose::Meta::TypeConstraint](https://metacpan.org/pod/Moose%3A%3AMeta%3A%3ATypeConstraint) and so on.
 
-Simply put, it's a way to define a constraint and store it in a package.
+```
+Data::Checks -----------------> ********
+                                *      *
+Type::Tiny -------------------> *      *
+                                * Kura * --> Call Named Value Constraints!
+Moose::Meta::TypeConstraint --> *      *
+                                *      *
+YourFavoriteChecker ----------> ********
+```
+
+# HOW TO USE
+
+## Declaring a constraint
+
+It's easy to use to store value constraints in a package:
 
 ```perl
 use kura NAME => CONSTRAINT;
@@ -48,14 +62,7 @@ use kura NAME => CONSTRAINT;
 
 This constraint must be a any object that has a `check` method, or a code reference that returns true or false.
 
-Kura inherits [Exporter](https://metacpan.org/pod/Exporter) and automatically adds the declared constraint to `@EXPORT_OK`. This means you can import types as follows:
-
-```perl
-use MyX qw(X);
-X->check('x'); # true
-```
-
-Order of type declarations is important, child types must be declared before parent types.
+Order of declarations is important, child constraints must be declared before parent constraints.
 
 ```perl
 # Bad order
@@ -65,6 +72,49 @@ use kura Child => Str;
 # Good order
 use kura Child => Str;
 use kura Parent => Dict[ name => Child ];
+```
+
+## Using a constraint
+
+You can use the declared constraint as follows:
+
+```perl
+package MyFoo {
+    use Data::Checks qw(StrEq);
+    use kura Foo => StrEq('foo');
+}
+
+use MyFoo qw(Foo);
+Foo->check('foo'); # true
+```
+
+Internally, Kura inherits [Exporter](https://metacpan.org/pod/Exporter) and automatically adds the declared constraint to `@EXPORT_OK`:
+
+```
+MyFoo->isa('Exporter'); # true
+@MyFoo::EXPORT_OK; # ('Foo')
+```
+
+So, you can add other functions to `@EXPORT_OK`:
+
+```perl
+ package MyFoo {
+     our @EXPORT_OK;
+     push @EXPORT_OK => qw(hello);
+
+     use kura Foo => sub { $_[0] eq 'foo' };
+
+     sub hello { 'Hello, World!' }
+}
+
+use MyFoo qw(Foo hello);
+hello(); # 'Hello, World!'
+```
+
+If you would like to use other exporter class, then set `$kura::EXPORTER_CLASS`:
+
+```
+$kura::EXPORTER_CLASS = 'MyExporter';
 ```
 
 # LICENSE
