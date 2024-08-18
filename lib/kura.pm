@@ -9,9 +9,24 @@ use Carp ();
 use Sub::Util ();
 use Scalar::Util ();
 
-my %forbidden_kura_name = map { $_ => 1 } qw{
+my %FORBIDDEN_NAME = map { $_ => 1 } qw{
     BEGIN CHECK DESTROY END INIT UNITCHECK
     AUTOLOAD STDIN STDOUT STDERR ARGV ARGVOUT ENV INC SIG
+};
+
+# This is a default Exporter class.
+# You can change this class by setting $kura::EXPORTER_CLASS.
+our $EXPORTER_CLASS = 'Exporter';
+
+# This is a default checker code to object.
+# You can change this code by setting $kura::CHECKER_CODE_TO_OBJECT.
+our $CHECKER_CODE_TO_OBJECT = sub {
+    my ($name, $checker, $caller) = @_;
+
+    require Type::Tiny;
+    Type::Tiny->new(
+        constraint => $checker,
+    );
 };
 
 sub import {
@@ -28,10 +43,10 @@ sub import_into {
     state $validate_name = sub {
         my ($name) = @_;
 
-        if (!$name) {
+        if (!defined $name) {
             return 'name is required';
         }
-        elsif ($forbidden_kura_name{$name}) {
+        elsif ($FORBIDDEN_NAME{$name}) {
             return "'$name' is forbidden.";
         }
         return;
@@ -54,13 +69,10 @@ sub import_into {
     };
 
     state $checker_to_code = sub {
-        my ($checker) = @_;
+        my ($name, $checker, $caller) = @_;
 
         if (Scalar::Util::reftype($checker) eq 'CODE') {
-            require Type::Tiny;
-            $checker = Type::Tiny->new(
-                constraint => $checker,
-            );
+            $checker = $CHECKER_CODE_TO_OBJECT->($name, $checker, $caller);
         }
 
         sub { $checker };
@@ -73,7 +85,7 @@ sub import_into {
             return "'$name' is already defined";
         }
 
-        my $code = $checker_to_code->($checker);
+        my $code = $checker_to_code->(@_);
 
         {
             no strict "refs";
@@ -87,7 +99,7 @@ sub import_into {
     state $setup_exporter = sub {
         my ($caller) = @_;
 
-        my $exporter_class = 'Exporter';
+        my $exporter_class = $EXPORTER_CLASS;
 
         unless ($caller->isa($exporter_class)) {
             no strict "refs";
