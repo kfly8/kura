@@ -5,9 +5,9 @@ use feature qw(state);
 
 our $VERSION = "0.01";
 
-use Carp qw(croak);
-use Sub::Util qw(set_subname);
-use Scalar::Util qw(blessed reftype);
+use Carp ();
+use Sub::Util ();
+use Scalar::Util ();
 
 my %forbidden_kura_name = map { $_ => 1 } qw{
     BEGIN CHECK DESTROY END INIT UNITCHECK
@@ -44,9 +44,9 @@ sub kura_import_into {
             return 'checker is required';
         }
 
-        return if blessed($checker) && $checker->can('check');
+        return if Scalar::Util::blessed($checker) && $checker->can('check');
 
-        my $ref = reftype($checker) // '';
+        my $ref = Scalar::Util::reftype($checker) // '';
 
         return if $ref eq 'CODE';
 
@@ -56,7 +56,7 @@ sub kura_import_into {
     state $checker_to_code = sub {
         my ($checker) = @_;
 
-        if (reftype($checker) eq 'CODE') {
+        if (Scalar::Util::reftype($checker) eq 'CODE') {
             require Type::Tiny;
             $checker = Type::Tiny->new(
                 constraint => $checker,
@@ -77,7 +77,7 @@ sub kura_import_into {
 
         {
             no strict "refs";
-            *{"$caller\::$name"} = set_subname( "$caller\::$name", $code);
+            *{"$caller\::$name"} = Sub::Util::set_subname( "$caller\::$name", $code);
             push @{"$caller\::EXPORT_OK"}, $name;
         }
 
@@ -102,16 +102,16 @@ sub kura_import_into {
     my $err;
 
     $err = $validate_name->($name);
-    croak $err if $err;
+    Carp::croak $err if $err;
 
     $err = $validate_checker->($checker);
-    croak $err if $err;
+    Carp::croak $err if $err;
 
     $err = $install_checker->($name, $checker, $caller);
-    croak $err if $err;
+    Carp::croak $err if $err;
 
     $err = $setup_exporter->($caller);
-    croak $err if $err;
+    Carp::croak $err if $err;
 }
 
 1;
