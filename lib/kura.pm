@@ -18,10 +18,10 @@ sub import {
     my $pkg = shift;
     my $caller = caller;
 
-    $pkg->kura_import_into($caller, @_);
+    $pkg->import_into($caller, @_);
 }
 
-sub kura_import_into {
+sub import_into {
     my $pkg = shift;
     my ($caller, $name, $checker) = @_;
 
