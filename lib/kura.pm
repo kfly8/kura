@@ -18,14 +18,16 @@ my %FORBIDDEN_NAME = map { $_ => 1 } qw{
 # You can change this class by setting $kura::EXPORTER_CLASS.
 our $EXPORTER_CLASS = 'Exporter';
 
-# This is a default checker code to object.
-# You can change this code by setting $kura::CHECKER_CODE_TO_OBJECT.
-our $CHECKER_CODE_TO_OBJECT = sub {
-    my ($name, $checker, $caller) = @_;
+# This is a default constraint code to object.
+# You can change this code by setting $kura::CALLABLE_TO_OBJECT.
+#
+# NOTE: This variable will probably change. Use caution when overriding it.
+our $CALLABLE_TO_OBJECT = sub {
+    my ($name, $constraint, $caller) = @_;
 
     require Type::Tiny;
     Type::Tiny->new(
-        constraint => $checker,
+        constraint => $constraint,
     );
 };
 
@@ -38,7 +40,7 @@ sub import {
 
 sub import_into {
     my $pkg = shift;
-    my ($caller, $name, $checker) = @_;
+    my ($caller, $name, $constraint) = @_;
 
     state $validate_name = sub {
         my ($name) = @_;
@@ -52,40 +54,40 @@ sub import_into {
         return;
     };
 
-    state $validate_checker = sub {
-        my ($checker) = @_;
+    state $validate_constraint = sub {
+        my ($constraint) = @_;
 
-        unless (defined $checker) {
-            return 'checker is required';
+        unless (defined $constraint) {
+            return 'constraint is required';
         }
 
-        return if Scalar::Util::blessed($checker) && $checker->can('check');
+        return if Scalar::Util::blessed($constraint) && $constraint->can('check');
 
-        my $ref = Scalar::Util::reftype($checker) // '';
+        my $ref = Scalar::Util::reftype($constraint) // '';
 
         return if $ref eq 'CODE';
 
-        return 'Not a valid checker';
+        return "Invalid constraint. It must be an object that has a 'check' method or a code reference.";
     };
 
-    state $checker_to_code = sub {
-        my ($name, $checker, $caller) = @_;
+    state $constraint_to_code = sub {
+        my ($name, $constraint, $caller) = @_;
 
-        if (Scalar::Util::reftype($checker) eq 'CODE') {
-            $checker = $CHECKER_CODE_TO_OBJECT->($name, $checker, $caller);
+        if (Scalar::Util::reftype($constraint) eq 'CODE') {
+            $constraint = $CALLABLE_TO_OBJECT->($name, $constraint, $caller);
         }
 
-        sub { $checker };
+        sub { $constraint };
     };
 
-    state $install_checker = sub {
-        my ($name, $checker, $caller) = @_;
+    state $install_constraint = sub {
+        my ($name, $constraint, $caller) = @_;
 
         if ($caller->can($name)) {
             return "'$name' is already defined";
         }
 
-        my $code = $checker_to_code->(@_);
+        my $code = $constraint_to_code->(@_);
 
         {
             no strict "refs";
@@ -116,10 +118,10 @@ sub import_into {
     $err = $validate_name->($name);
     Carp::croak $err if $err;
 
-    $err = $validate_checker->($checker);
+    $err = $validate_constraint->($constraint);
     Carp::croak $err if $err;
 
-    $err = $install_checker->($name, $checker, $caller);
+    $err = $install_constraint->($name, $constraint, $caller);
     Carp::croak $err if $err;
 
     $err = $setup_exporter->($caller);
@@ -176,7 +178,7 @@ Kura - means "Traditional Japanese storehouse" - stores constraints, such as L<D
                                     |  Kura  | ---> Named Value Constraints!
     Moose::Meta::TypeConstraint --> |        |
                                     |        |
-    YourFavoriteChecker ----------> +--------+
+    YourFavoriteConstraint -------> +--------+
 
 If your project uses multiple constraint libraries, kura allows you to simplify your codebase and making it easier to manage different constraint systems. This is especially useful in large projects or when migrating from one constraint system to another.
 

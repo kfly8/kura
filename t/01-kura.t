@@ -1,24 +1,24 @@
 use Test2::V0;
 
 use lib './t/lib';
-use MyChecker;
+use MyConstraint;
 
 subtest 'Test `kura` features' => sub {
-    subtest '`kura` import checker into caller' => sub {
-        use kura X => MyChecker->new;
-        isa_ok X, 'MyChecker';
+    subtest '`kura` import constraint into caller' => sub {
+        use kura X => MyConstraint->new;
+        isa_ok X, 'MyConstraint';
     };
 
     subtest '`kura` with constarint and other function.' => sub {
         use MyFoo qw(Foo hello);
-        isa_ok Foo, 'MyChecker';
+        isa_ok Foo, 'MyConstraint';
         is hello(), 'Hello, Foo!';
     };
 };
 
 subtest 'Test `kura` exceptions' => sub {
-    subtest 'Checker already defined' => sub {
-        eval "use kura Foo => MyChecker->new";
+    subtest 'Constraint already defined' => sub {
+        eval "use kura Foo => MyConstraint->new";
         like $@, qr/^'Foo' is already defined/;
     };
 
@@ -28,24 +28,24 @@ subtest 'Test `kura` exceptions' => sub {
     };
 
     subtest 'Forbidden name' => sub {
-        eval "use kura BEGIN => MyChecker->new";
+        eval "use kura BEGIN => MyConstraint->new";
         like $@, qr/^'BEGIN' is forbidden/;
     };
 
-    subtest 'Not given checker' => sub {
+    subtest 'Not given constraint' => sub {
         eval "use kura Foo";
-        like $@, qr/^checker is required/;
+        like $@, qr/^constraint is required/;
     };
 
-    subtest 'Invalid checker' => sub {
+    subtest 'Invalid constraint' => sub {
         eval "use kura Bar => 1";
-        like $@, qr/^Not a valid checker/;
+        like $@, qr/^Invalid constraint/;
     };
 
     subtest 'Invalid orders' => sub {
         eval "
             use kura B => A;
-            use kura A => MyChecker->new;
+            use kura A => MyConstraint->new;
         ";
         like $@, qr/^Bareword "A" not allowed/;
     };

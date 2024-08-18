@@ -4,9 +4,9 @@ our @EXPORT_OK;
 push @EXPORT_OK, qw(hello);
 
 use lib 't/lib';
-use MyChecker;
+use MyConstraint;
 
-use kura Foo => MyChecker->new;
+use kura Foo => MyConstraint->new;
 
 sub hello { 'Hello, Foo!' }
 

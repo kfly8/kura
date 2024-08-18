@@ -8,11 +8,11 @@ sub import {
     my $class = shift;
     my $caller = caller;
 
-    my ($name, $checker) = @_;
+    my ($name, $constraint) = @_;
 
     $name = 'My' . $name;
 
-    kura->import_into($caller, $name, $checker);
+    kura->import_into($caller, $name, $constraint);
 }
 
 1;

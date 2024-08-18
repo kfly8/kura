@@ -1,14 +1,14 @@
 use Test2::V0;
 
 use lib './t/lib';
-use MyChecker;
+use MyConstraint;
 
 subtest 'Test `import_into` method' => sub {
     subtest 'Customize the import method to your taste' => sub {
-        use mykura Foo => MyChecker->new;
+        use mykura Foo => MyConstraint->new;
 
-        # MyKura customize the name of the checker
-        isa_ok MyFoo, 'MyChecker';
+        # MyKura customize the name of the constraint
+        isa_ok MyFoo, 'MyConstraint';
     }
 };
 

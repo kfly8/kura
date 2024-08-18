@@ -47,7 +47,7 @@ Type::Tiny -------------------> |        |
                                 |  Kura  | ---> Named Value Constraints!
 Moose::Meta::TypeConstraint --> |        |
                                 |        |
-YourFavoriteChecker ----------> +--------+
+YourFavoriteConstraint -------> +--------+
 ```
 
 If your project uses multiple constraint libraries, kura allows you to simplify your codebase and making it easier to manage different constraint systems. This is especially useful in large projects or when migrating from one constraint system to another.
