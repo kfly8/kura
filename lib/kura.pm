@@ -66,7 +66,7 @@ sub _validate_name {
         return "'$name' is forbidden.";
     }
     return;
-};
+}
 
 sub _validate_constraint {
     my ($constraint) = @_;
@@ -82,7 +82,7 @@ sub _validate_constraint {
     return if $ref eq 'CODE';
 
     return "Invalid constraint. It must be an object that has a 'check' method or a code reference.";
-};
+}
 
 sub _constraint_to_code {
     my ($name, $constraint, $caller) = @_;
@@ -92,7 +92,7 @@ sub _constraint_to_code {
     }
 
     sub { $constraint };
-};
+}
 
 sub _install_constraint {
     my ($name, $constraint, $caller) = @_;
@@ -110,7 +110,7 @@ sub _install_constraint {
     }
 
     return;
-};
+}
 
 sub _setup_exporter {
     my ($caller) = @_;
@@ -125,7 +125,7 @@ sub _setup_exporter {
     }
 
     return;
-};
+}
 
 1;
 __END__
