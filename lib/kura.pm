@@ -15,8 +15,15 @@ my %forbidden_kura_name = map { $_ => 1 } qw{
 };
 
 sub import {
-    my $class = shift;
-    my ($name, $checker) = @_;
+    my $pkg = shift;
+    my $caller = caller;
+
+    $pkg->kura_import_into($caller, @_);
+}
+
+sub kura_import_into {
+    my $pkg = shift;
+    my ($caller, $name, $checker) = @_;
 
     state $validate_name = sub {
         my ($name) = @_;
@@ -100,7 +107,6 @@ sub import {
     $err = $validate_checker->($checker);
     croak $err if $err;
 
-    my $caller = caller;
     $err = $install_checker->($name, $checker, $caller);
     croak $err if $err;
 
