@@ -1,7 +1,6 @@
 package kura;
 use strict;
 use warnings;
-use feature qw(state);
 
 our $VERSION = "0.01";
 
@@ -42,91 +41,91 @@ sub import_into {
     my $pkg = shift;
     my ($caller, $name, $constraint) = @_;
 
-    state $validate_name = sub {
-        my ($name) = @_;
-
-        if (!defined $name) {
-            return 'name is required';
-        }
-        elsif ($FORBIDDEN_NAME{$name}) {
-            return "'$name' is forbidden.";
-        }
-        return;
-    };
-
-    state $validate_constraint = sub {
-        my ($constraint) = @_;
-
-        unless (defined $constraint) {
-            return 'constraint is required';
-        }
-
-        return if Scalar::Util::blessed($constraint) && $constraint->can('check');
-
-        my $ref = Scalar::Util::reftype($constraint) // '';
-
-        return if $ref eq 'CODE';
-
-        return "Invalid constraint. It must be an object that has a 'check' method or a code reference.";
-    };
-
-    state $constraint_to_code = sub {
-        my ($name, $constraint, $caller) = @_;
-
-        if (Scalar::Util::reftype($constraint) eq 'CODE') {
-            $constraint = $CALLABLE_TO_OBJECT->($name, $constraint, $caller);
-        }
-
-        sub { $constraint };
-    };
-
-    state $install_constraint = sub {
-        my ($name, $constraint, $caller) = @_;
-
-        if ($caller->can($name)) {
-            return "'$name' is already defined";
-        }
-
-        my $code = $constraint_to_code->(@_);
-
-        {
-            no strict "refs";
-            *{"$caller\::$name"} = Sub::Util::set_subname( "$caller\::$name", $code);
-            push @{"$caller\::EXPORT_OK"}, $name;
-        }
-
-        return;
-    };
-
-    state $setup_exporter = sub {
-        my ($caller) = @_;
-
-        my $exporter_class = $EXPORTER_CLASS;
-
-        unless ($caller->isa($exporter_class)) {
-            no strict "refs";
-            push @{ "$caller\::ISA" }, $exporter_class;
-            ( my $file = $caller ) =~ s{::}{/}g;
-            $INC{"$file.pm"} ||= __FILE__;
-        }
-
-        return;
-    };
-
     my $err;
 
-    $err = $validate_name->($name);
+    $err = _validate_name($name);
     Carp::croak $err if $err;
 
-    $err = $validate_constraint->($constraint);
+    $err = _validate_constraint($constraint);
     Carp::croak $err if $err;
 
-    $err = $install_constraint->($name, $constraint, $caller);
+    $err = _install_constraint($name, $constraint, $caller);
     Carp::croak $err if $err;
 
-    $err = $setup_exporter->($caller);
+    $err = _setup_exporter($caller);
     Carp::croak $err if $err;
 }
+
+sub _validate_name {
+    my ($name) = @_;
+
+    if (!defined $name) {
+        return 'name is required';
+    }
+    elsif ($FORBIDDEN_NAME{$name}) {
+        return "'$name' is forbidden.";
+    }
+    return;
+};
+
+sub _validate_constraint {
+    my ($constraint) = @_;
+
+    unless (defined $constraint) {
+        return 'constraint is required';
+    }
+
+    return if Scalar::Util::blessed($constraint) && $constraint->can('check');
+
+    my $ref = Scalar::Util::reftype($constraint) // '';
+
+    return if $ref eq 'CODE';
+
+    return "Invalid constraint. It must be an object that has a 'check' method or a code reference.";
+};
+
+sub _constraint_to_code {
+    my ($name, $constraint, $caller) = @_;
+
+    if (Scalar::Util::reftype($constraint) eq 'CODE') {
+        $constraint = $CALLABLE_TO_OBJECT->($name, $constraint, $caller);
+    }
+
+    sub { $constraint };
+};
+
+sub _install_constraint {
+    my ($name, $constraint, $caller) = @_;
+
+    if ($caller->can($name)) {
+        return "'$name' is already defined";
+    }
+
+    my $code = _constraint_to_code(@_);
+
+    {
+        no strict "refs";
+        *{"$caller\::$name"} = Sub::Util::set_subname( "$caller\::$name", $code);
+        push @{"$caller\::EXPORT_OK"}, $name;
+    }
+
+    return;
+};
+
+sub _setup_exporter {
+    my ($caller) = @_;
+
+    my $exporter_class = $EXPORTER_CLASS;
+
+    unless ($caller->isa($exporter_class)) {
+        no strict "refs";
+        push @{ "$caller\::ISA" }, $exporter_class;
+        ( my $file = $caller ) =~ s{::}{/}g;
+        $INC{"$file.pm"} ||= __FILE__;
+    }
+
+    return;
+};
 
 1;
 __END__
