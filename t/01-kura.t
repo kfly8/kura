@@ -41,6 +41,14 @@ subtest 'Test `kura` exceptions' => sub {
         eval "use kura Bar => 1";
         like $@, qr/^Not a valid checker/;
     };
+
+    subtest 'Invalid orders' => sub {
+        eval "
+            use kura B => A;
+            use kura A => MyChecker->new;
+        ";
+        like $@, qr/^Bareword "A" not allowed/;
+    };
 };
 
 done_testing;

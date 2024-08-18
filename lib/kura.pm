@@ -168,7 +168,7 @@ kura - Store constraints for Data::Checks, Type::Tiny, Moose and so on.
 
 =head1 DESCRIPTION
 
-Kura - means "Traditional Japanese storehouse" - stores constraints, such as L<Data::Checks>, L<Type::Tiny>, L<Moose::Meta::TypeConstraint> and so on.
+Kura - means "Traditional Japanese storehouse" - stores constraints, such as L<Data::Checks>, L<Type::Tiny>, L<Moose::Meta::TypeConstraint>, L<Mouse::Meta::TypeConstraint>, L<Specio> and so on. Of course, you can use L<Moo> with kura by using L<Type::Tiny> constraints.
 
     Data::Checks -----------------> ********
                                     *      *
@@ -191,7 +191,7 @@ This constraint must be a any object that has a C<check> method, or a code refer
 Order of declarations is important, child constraints must be declared before parent constraints.
 
     # Bad order
-    use kura Parent => Dict[ name => Child ];
+    use kura Parent => Dict[ name => Child ]; # => Bareword "Child" not allowed
     use kura Child => Str;
 
     # Good order
@@ -252,7 +252,10 @@ You can change this class by setting C<$kura::EXPORTER_CLASS>.
         use mykura Foo => sub { $_[0] eq 'foo' };
     }
 
-    MyFoo->isa('Exporter::Tiny'); # true
+    # Exporter::Tiny accepts the `-as` option
+    use MyFoo Foo => { -as => 'CheckerFoo' };
+
+    CheckerFoo->check('foo'); # true
 
 =head1 LICENSE
 

@@ -38,7 +38,7 @@ ok !Qux->check('foo') && !Qux->check('bar') && !Qux->check('baz') &&  Qux->check
 
 # DESCRIPTION
 
-Kura - means "Traditional Japanese storehouse" - stores constraints, such as [Data::Checks](https://metacpan.org/pod/Data%3A%3AChecks), [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny), [Moose::Meta::TypeConstraint](https://metacpan.org/pod/Moose%3A%3AMeta%3A%3ATypeConstraint) and so on.
+Kura - means "Traditional Japanese storehouse" - stores constraints, such as [Data::Checks](https://metacpan.org/pod/Data%3A%3AChecks), [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny), [Moose::Meta::TypeConstraint](https://metacpan.org/pod/Moose%3A%3AMeta%3A%3ATypeConstraint), [Mouse::Meta::TypeConstraint](https://metacpan.org/pod/Mouse%3A%3AMeta%3A%3ATypeConstraint), [Specio](https://metacpan.org/pod/Specio) and so on. Of course, you can use [Moo](https://metacpan.org/pod/Moo) with kura by using [Type::Tiny](https://metacpan.org/pod/Type%3A%3ATiny) constraints.
 
 ```
 Data::Checks -----------------> ********
@@ -66,7 +66,7 @@ Order of declarations is important, child constraints must be declared before pa
 
 ```perl
 # Bad order
-use kura Parent => Dict[ name => Child ];
+use kura Parent => Dict[ name => Child ]; # => Bareword "Child" not allowed
 use kura Child => Str;
 
 # Good order
@@ -135,7 +135,10 @@ package MyFoo {
     use mykura Foo => sub { $_[0] eq 'foo' };
 }
 
-MyFoo->isa('Exporter::Tiny'); # true
+# Exporter::Tiny accepts the `-as` option
+use MyFoo Foo => { -as => 'CheckerFoo' };
+
+CheckerFoo->check('foo'); # true
 ```
 
 # LICENSE
