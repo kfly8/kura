@@ -2,9 +2,12 @@ use Test2::V0;
 use Test2::Require::Module 'Moo', '2.005005';
 use Test2::Require::Module 'Type::Tiny', '2.000000';
 
-subtest 'Test `kura` with Moo' => sub {
-    use kura Foo => sub { $_[0] eq 'foo' };
+use FindBin qw($Bin);
+use lib "$Bin";
 
+use TestMoo qw(Foo);
+
+subtest 'Test `kura` with Moo' => sub {
     # Moo accepts Type::Tiny
     isa_ok Foo, 'Type::Tiny';
 

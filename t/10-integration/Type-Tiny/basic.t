@@ -1,11 +1,12 @@
 use Test2::V0;
 use Test2::Require::Module 'Type::Tiny', '2.000000';
 
-use Types::Standard -types;
+use FindBin qw($Bin);
+use lib "$Bin";
+
+use TestTypeTiny qw(Foo);
 
 subtest 'Test `kura` with Type::Tiny' => sub {
-    use kura Foo => Str & sub { length $_ > 0 };
-
     isa_ok Foo, 'Type::Tiny';
 
     ok !Foo->check('');

@@ -3,7 +3,7 @@ use Test2::Require::Module 'Exporter::Tiny', '1.006002';
 use Test2::Require::Module 'Type::Tiny', '2.000000';
 
 use FindBin qw($Bin);;
-use lib "$Bin/Exporter-Tiny";
+use lib "$Bin";
 
 subtest 'Test `kura` with Exporter::Tiny' => sub {
     use mykura Foo => sub { $_ eq 'foo' };

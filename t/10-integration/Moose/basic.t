@@ -1,11 +1,12 @@
 use Test2::V0;
 use Test2::Require::Module 'Moose', '2.2207';
 
-use Moose::Util::TypeConstraints;
+use FindBin qw($Bin);
+use lib "$Bin";
+
+use TestMoose qw(Foo);
 
 subtest 'Test `kura` with Moose' => sub {
-    use kura Foo => subtype 'Name', as 'Str', where { length $_ > 0 };
-
     isa_ok Foo, 'Moose::Meta::TypeConstraint';
 
     ok !Foo->check('');
