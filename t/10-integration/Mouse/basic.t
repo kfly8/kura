@@ -1,11 +1,12 @@
 use Test2::V0;
 use Test2::Require::Module 'Mouse', 'v2.5.11';
 
-use Mouse::Util::TypeConstraints;
+use FindBin qw($Bin);
+use lib "$Bin";
+
+use TestMouse qw(Foo);
 
 subtest 'Test `kura` with Mouse' => sub {
-    use kura Foo => subtype 'Name', as 'Str', where { length $_ > 0 };
-
     isa_ok Foo, 'Mouse::Meta::TypeConstraint';
 
     ok !Foo->check('');
