@@ -5,16 +5,17 @@ use Test2::Require::Module 'Type::Tiny', '2.000000';
 use FindBin qw($Bin);;
 use lib "$Bin";
 
-subtest 'Test `kura` with Exporter::Tiny' => sub {
-    use mykura Foo => sub { $_ eq 'foo' };
+use TestExporterTiny qw(Foo);
 
-    isa_ok __PACKAGE__, 'Exporter::Tiny';
+# Exporter::Tiny accepts the `-as` option
+use TestExporterTiny Foo => { -as => "Foo2" };
+
+subtest 'Test `kura` with Exporter::Tiny' => sub {
+
+    ok +TestExporterTiny->isa('Exporter::Tiny');
 
     ok !Foo->check('');
     ok Foo->check('foo');
-
-    # Exporter::Tiny accepts the `-as` option
-    use MyFoo Foo => { -as => "Foo2" };
 
     ok !Foo2->check('');
     ok Foo2->check('foo');

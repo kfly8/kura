@@ -5,7 +5,6 @@ use Test2::Require::Perl 'v5.38';
 use FindBin qw($Bin);
 use lib "$Bin";
 
-# Error! builtin-class @ISA is a read-only, but attempt to modify it
 use TestBuiltinClass qw(Foo);
 
 subtest 'Test `kura` with builtin class' => sub {
