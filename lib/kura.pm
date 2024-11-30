@@ -101,8 +101,10 @@ sub _install_constraint {
 
     {
         no strict "refs";
+        no warnings "once";
         *{"$caller\::$name"} = Sub::Util::set_subname( "$caller\::$name", $code);
         push @{"$caller\::EXPORT_OK"}, $name;
+        push @{"$caller\::KURA"}, $name;
     }
 
     return;
