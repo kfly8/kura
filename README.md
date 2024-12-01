@@ -129,6 +129,46 @@ Attempt to call undefined import method with arguments ("Foo" ...) via package "
 (Perhaps you forgot to load the package?)
 ```
 
+## ENVIRONMENT VARIABLES
+
+Environment variables `@EXPORT_OK` and `@KURA` are automatically set when you use `kura` in your package:
+
+```perl
+package MyFoo {
+    use Exporter 'import';
+    use Types::Common -types;
+    use kura Foo1 => StrLength[1, 255];
+    use kura Foo2 => StrLength[1, 1000];
+
+    our @EXPORT_OK;
+    push @EXPORT_OK, qw(hello);
+
+    sub hello { 'Hello, Foo!' }
+}
+
+# Automatically set the caller package to MyFoo
+MyFoo::EXPORT_OK # => ('Foo1', 'Foo2', 'hello')
+MyFoo::KURA      # => ('Foo1', 'Foo2')
+```
+
+It is useful when you want to export constraints. For example, you can tag `@KURA` with `%EXPORT_TAGS`:
+
+```perl
+package MyBar {
+    use Exporter 'import';
+    use Types::Common -types;
+    use kura Bar1 => StrLength[1, 255];
+    use kura Bar2 => StrLength[1, 1000];
+
+    our %EXPORT_TAGS = (
+        types => \@MyBar::KURA,
+    );
+}
+
+use MyBar qw(:types);
+# => Bar1, Bar2 are exported
+```
+
 # LICENSE
 
 Copyright (C) kobaken.

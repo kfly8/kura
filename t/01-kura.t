@@ -9,10 +9,19 @@ subtest 'Test `kura` features' => sub {
         isa_ok X, 'MyConstraint';
     };
 
-    subtest '`kura` with constarint and other function.' => sub {
+    subtest '`kura` with constraint and other function.' => sub {
         use MyFoo qw(Foo hello);
         isa_ok Foo, 'MyConstraint';
         is hello(), 'Hello, Foo!';
+    };
+
+    subtest '`kura` with tags' => sub {
+        use MyBar qw(:types);
+        isa_ok Bar1, 'MyConstraint';
+        isa_ok Bar2, 'MyConstraint';
+        isa_ok Bar3, 'MyConstraint';
+        is \@MyBar::KURA, [qw(Bar1 Bar2 Bar3)], 'types defined by kura are stored in $PACKAGE::KURA';
+        is \@MyBar::EXPORT_OK, [qw(Bar1 Bar2 Bar3 bar_hello)];
     };
 };
 

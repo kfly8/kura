@@ -101,8 +101,10 @@ sub _install_constraint {
 
     {
         no strict "refs";
+        no warnings "once";
         *{"$caller\::$name"} = Sub::Util::set_subname( "$caller\::$name", $code);
         push @{"$caller\::EXPORT_OK"}, $name;
+        push @{"$caller\::KURA"}, $name;
     }
 
     return;
@@ -238,6 +240,42 @@ If you forget to put C<use Exporter 'import';>, you get an error like this:
     # => ERROR!
     Attempt to call undefined import method with arguments ("Foo" ...) via package "MyFoo"
     (Perhaps you forgot to load the package?)
+
+=head2 ENVIRONMENT VARIABLES
+
+Environment variables C<@EXPORT_OK> and C<@KURA> are automatically set when you use C<kura> in your package:
+
+    package MyFoo {
+        use Exporter 'import';
+        use Types::Common -types;
+        use kura Foo1 => StrLength[1, 255];
+        use kura Foo2 => StrLength[1, 1000];
+
+        our @EXPORT_OK;
+        push @EXPORT_OK, qw(hello);
+
+        sub hello { 'Hello, Foo!' }
+    }
+
+    # Automatically set the caller package to MyFoo
+    MyFoo::EXPORT_OK # => ('Foo1', 'Foo2', 'hello')
+    MyFoo::KURA      # => ('Foo1', 'Foo2')
+
+It is useful when you want to export constraints. For example, you can tag C<@KURA> with C<%EXPORT_TAGS>:
+
+    package MyBar {
+        use Exporter 'import';
+        use Types::Common -types;
+        use kura Bar1 => StrLength[1, 255];
+        use kura Bar2 => StrLength[1, 1000];
+
+        our %EXPORT_TAGS = (
+            types => \@MyBar::KURA,
+        );
+    }
+
+    use MyBar qw(:types);
+    # => Bar1, Bar2 are exported
 
 =head1 LICENSE
 
