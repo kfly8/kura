@@ -33,76 +33,59 @@ sub import {
     $pkg->import_into($caller, @_);
 }
 
+# Import into the caller package.
 sub import_into {
     my $pkg = shift;
     my ($caller, $name, $constraint) = @_;
 
-    my $err;
-
-    $err = _validate_name($name);
+    my ($kura_item, $err) = _new_kura_item($name, $constraint, $caller);
     Carp::croak $err if $err;
 
-    $err = _validate_constraint($constraint);
-    Carp::croak $err if $err;
-
-    $err = _install_constraint($name, $constraint, $caller);
-    Carp::croak $err if $err;
-
-    $err = _setup_inc($caller);
-    Carp::croak $err if $err;
+    _save_kura_item($kura_item, $caller);
+    _save_inc($caller);
 }
 
-sub _validate_name {
-    my ($name) = @_;
-
-    if (!defined $name) {
-        return 'name is required';
-    }
-    elsif ($FORBIDDEN_NAME{$name}) {
-        return "'$name' is forbidden.";
-    }
-    return;
-}
-
-sub _validate_constraint {
-    my ($constraint) = @_;
-
-    unless (defined $constraint) {
-        return 'constraint is required';
-    }
-
-    return if Scalar::Util::blessed($constraint) && $constraint->can('check');
-
-    my $ref = Scalar::Util::reftype($constraint) // '';
-
-    return if $ref eq 'CODE';
-
-    return "Invalid constraint. It must be an object that has a 'check' method or a code reference.";
-}
-
-sub _constraint_to_code {
+# Create a new kura item which is Dict[name => Str, code => CodeRef].
+# If the name or constraint is invalid, it returns (undef, $error_message).
+# Otherwise, it returns ($kura_item, undef).
+sub _new_kura_item {
     my ($name, $constraint, $caller) = @_;
-
-    if (Scalar::Util::reftype($constraint) eq 'CODE') {
-        $constraint = $CALLABLE_TO_OBJECT->($name, $constraint, $caller);
-    }
-
-    sub { $constraint };
-}
-
-sub _install_constraint {
-    my ($name, $constraint, $caller) = @_;
-
-    if ($caller->can($name)) {
-        return "'$name' is already defined";
-    }
-
-    my $code = _constraint_to_code(@_);
 
     {
+        return (undef, 'name is required') if !defined $name;
+        return (undef, "'$name' is forbidden.") if $FORBIDDEN_NAME{$name};
+        return (undef, "'$name' is already defined") if $caller->can($name);
+    }
+
+    {
+        return (undef, 'constraint is required') if !defined $constraint;
+
+        if (Scalar::Util::blessed($constraint)) {
+            return (undef, 'Invalid constraint. It requires a `check` method.') if !$constraint->can('check');
+        }
+        elsif ( (Scalar::Util::reftype($constraint)||'') eq 'CODE') {
+            $constraint = $CALLABLE_TO_OBJECT->($name, $constraint, $caller);
+        }
+        else {
+            return (undef, 'Invalid constraint. It must be an object that has a `check` method or a code reference.');
+        }
+    }
+
+    my $kura_item = { name => $name, code => sub { $constraint } };
+    return ($kura_item, undef);
+}
+
+# Save the kura item to the caller package
+sub _save_kura_item {
+    my ($kura_item, $caller) = @_;
+
+    {
+        my $name = $kura_item->{name};
+        my $code = Sub::Util::set_subname("$caller\::$name", $kura_item->{code});
+
         no strict "refs";
         no warnings "once";
-        *{"$caller\::$name"} = Sub::Util::set_subname( "$caller\::$name", $code);
+        *{"$caller\::$name"} = $code;
         push @{"$caller\::EXPORT_OK"}, $name;
         push @{"$caller\::KURA"}, $name;
     }
@@ -110,10 +93,10 @@ sub _install_constraint {
     return;
 }
 
-sub _setup_inc {
+# Hack to make the caller package already loaded. Useful for multi-packages in a single file.
+sub _save_inc {
     my ($caller) = @_;
 
-    # Hack to make the caller package already loaded. Useful for multi-packages in a single file.
     ( my $file = $caller ) =~ s{::}{/}g;
     $INC{"$file.pm"} ||= __FILE__;
 
