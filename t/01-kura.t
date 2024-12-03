@@ -48,7 +48,10 @@ subtest 'Test `kura` exceptions' => sub {
 
     subtest 'Invalid constraint' => sub {
         eval "use kura Bar => 1";
-        like $@, qr/^Invalid constraint/;
+        like $@, qr/^Invalid constraint. It must be an object that has a `check` method or a code reference./;
+
+        eval "use kura Bar => (bless {}, 'SomeObject')";
+        like $@, qr/^Invalid constraint. It requires a `check` method./;
     };
 
     subtest 'Invalid orders' => sub {
