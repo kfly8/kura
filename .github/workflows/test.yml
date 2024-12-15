@@ -51,6 +51,8 @@ jobs:
           cpm install -g MooseX::Types
           cpm install -g Exporter::Tiny
           cpm install -g Valiant
+          cpm install -g Poz
+          cpm install -g Data::Validator
 
       - run: perl Build.PL
       - run: ./Build
