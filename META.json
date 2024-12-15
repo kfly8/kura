@@ -64,7 +64,7 @@
          "web" : "https://github.com/kfly8/kura"
       }
    },
-   "version" : "0.06",
+   "version" : "0.07",
    "x_authority" : "cpan:KFLY",
    "x_serialization_backend" : "JSON::PP version 4.16",
    "x_static_install" : 1
